@@ -1,0 +1,2 @@
+# resolve_batch_io_point
+按照特定规则通过设定IO点批量添加基于Single Clip的渲染任务
