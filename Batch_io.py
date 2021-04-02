@@ -26,7 +26,7 @@ def this_timeline():
 class Add_retime_render():
 
     def __init__(self, output_path, file_name = 'Utitled', key_color = 'Pink', render_preset = 'test_preset_name', track = 1):
-        self.track_num = track
+        self.track_num = int(track)
         self.output_path = output_path
         self.file_name = file_name
         self.key_color = key_color
@@ -46,7 +46,7 @@ class Add_retime_render():
                     clip_in = self.all_clips[i].GetStart()
                     clip_out = self.all_clips[i].GetEnd()
                     render_settings = {
-                        'MarkIn': clip_in,
+                        'MarkIn': int(clip_in),
                         'MarkOut': int(clip_out) - 1,
                         'TargetDir': self.output_path,
                         'CustomName': self.file_name
@@ -122,7 +122,7 @@ def load_preset():
 
 def load_track_count():
     itm['tracknum'].Clear()
-    v_track = this_timeline().GetTrackCount('video')
+    v_track = int(this_timeline().GetTrackCount('video'))
     for i in range(1, v_track + 1):
         itm['tracknum'].AddItem(str(i))
 
