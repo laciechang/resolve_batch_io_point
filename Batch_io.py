@@ -51,8 +51,8 @@ class Add_retime_render():
                         'TargetDir': self.output_path,
                         'CustomName': self.file_name
                     }
-                    pj.SetRenderSettings(render_settings)
                     pj.LoadRenderPreset(self.render_preset)
+                    pj.SetRenderSettings(render_settings)
                     pj.AddRenderJob()
                 else:
                     print('No clip to render')
