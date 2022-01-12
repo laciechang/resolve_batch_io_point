@@ -49,7 +49,7 @@ class Add_retime_render():
                         'MarkIn': int(clip_in),
                         'MarkOut': int(clip_out) - 1,
                         'TargetDir': self.output_path,
-                        'CustomName': self.file_name
+                        #'CustomName': self.file_name
                     }
                     pj.LoadRenderPreset(self.render_preset)
                     pj.SetRenderSettings(render_settings)
