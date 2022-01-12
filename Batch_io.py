@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 # Author: 张来吃
-# Version: 1.0
+# Version: 1.1
 # Contact: laciechang@163.com
 
 # -----------------------------------------------------
@@ -87,7 +87,7 @@ window_01 = [
                     ]),
                     
                     ui.HGap({"Spacing": 10}),
-                    ui.Button({"ID": "add_job", "Text": "Run", "Weight": 7}),
+                    ui.Button({"ID": "add_job", "Text": "Run", "Enabled": False, "Weight": 7}),
                     ui.HGap({"Spacing": 10}),
             ]),
         ]),
@@ -96,7 +96,7 @@ window_01 = [
 current_window = window_01
 
 dlg = disp.AddWindow({ 
-                        "WindowTitle": "Batch Render Tools v1.0", 
+                        "WindowTitle": "Batch Render Tools v1.1", 
                         "ID": "MyWin", 
                         "Geometry": [ 
                                     600, 300, # position when starting
@@ -146,6 +146,12 @@ def _refresh_presets(ev):
 def _refresh_track(ev):
     load_track_count()
 
+def _release_run_button(ev):
+    if len(itm['r_path'].Text) >= 1:
+        itm['add_job'].Enabled = True
+    else:
+        itm['add_job'].Enabled = False
+
 for colr in clip_colors:
     itm['clipcolors'].AddItem(colr)
 
@@ -156,8 +162,9 @@ dlg.On.pickpath.Clicked = _pickfile
 dlg.On.add_job.Clicked = _run_add
 dlg.On.refresh_presets.Clicked = _refresh_presets
 dlg.On.refresh_track.Clicked = _refresh_track
+dlg.On.r_path.TextChanged = _release_run_button
 
-
-dlg.Show()
-disp.RunLoop()
-dlg.Hide()
+if __name__ is "__main__":
+    dlg.Show()
+    disp.RunLoop()
+    dlg.Hide()
