@@ -164,7 +164,7 @@ dlg.On.refresh_presets.Clicked = _refresh_presets
 dlg.On.refresh_track.Clicked = _refresh_track
 dlg.On.r_path.TextChanged = _release_run_button
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     dlg.Show()
     disp.RunLoop()
     dlg.Hide()

@@ -180,14 +180,16 @@ def this_timeline():
     return this_pj().GetCurrentTimeline()
 
 class Add_retime_render(object):
-    def __init__(self, direction, key_color = 'Pink', render_preset = 'test_preset_name', track = 1, isVFXPullResoltion = False):
+    def __init__(self, direction, key_color = 'Pink', render_preset = 'test_preset_name', track = 1, isVFXPullResoltion = False, ui_item=None):
         self.track_num = int(track)
         self.key_color = '' if key_color == '点击选取片段颜色' else key_color
         self.render_preset = render_preset
         self.isVFXPullResoltion = isVFXPullResoltion
         self.all_clips = this_timeline().GetItemsInTrack('video', self.track_num)
         self.direction = direction
-    
+        self.itm = ui_item
+        self.pj = this_pj()
+
     def clips_reso_status(self, VFXPullReso):
         output = {}
         for i in self.all_clips:
@@ -234,8 +236,28 @@ class Add_retime_render(object):
         else:
             return 0, 0
 
-    def render_single_clip(self, output_path, file_name = 'Utitled',VFXPullReso=2048):
-        pj = this_pj()
+    def total_job_count(self):
+        total = 0
+        for i in self.all_clips:
+            tClip = self.all_clips[i]
+            clip_color = tClip.GetClipColor()
+            if clip_color is '':
+                pass
+            elif clip_color == self.key_color:
+                total += 1
+        return total
+    
+    def increase_pgbar(self, ratio):
+        total_width = int(itm[ProgressBarBG].GetGeometry()[3])
+        width = total_width * ratio
+        self.itm[ProgressBar].Resize([int(width), 3])
+
+    def render_single_clip(self, output_path ,VFXPullReso=2048):
+        successed_job = 0
+        total = self.total_job_count()
+        self.itm[ProgressBar].Visible = True
+        self.itm[ProgressBar].Resize([1, 3])
+        self.itm[AddRenderJobs].Enabled = False
         for i in self.all_clips:
             tClip = self.all_clips[i]
             w, h = self.calc_output_height(tClip, VFXPullReso)
@@ -243,26 +265,28 @@ class Add_retime_render(object):
             if clip_color is '':
                 print('Clip color is empty, passed.')
                 pass
-            else:
-                if clip_color == self.key_color:
-                    clip_in = tClip.GetStart()
-                    clip_out = tClip.GetEnd()
-                    render_settings = {
-                        'MarkIn': int(clip_in),
-                        'MarkOut': int(clip_out) - 1,
-                        'TargetDir': output_path,
-                        # 'CustomName': file_name,
-                    }
-                    if self.isVFXPullResoltion is True:
-                        render_settings['FormatWidth'] = w
-                        render_settings['FormatHeight'] = h
+            elif clip_color == self.key_color:
+                clip_in = tClip.GetStart()
+                clip_out = tClip.GetEnd()
+                render_settings = {
+                    'MarkIn': int(clip_in),
+                    'MarkOut': int(clip_out) - 1,
+                    'TargetDir': output_path,
+                }
+                if self.isVFXPullResoltion is True:
+                    render_settings['FormatWidth'] = w
+                    render_settings['FormatHeight'] = h
 
-                    pj.LoadRenderPreset(self.render_preset)
-                    pj.SetRenderSettings(render_settings)
-                    pj.AddRenderJob()
-                else:
-                    # print('No clip to render')
-                    pass
+                self.pj.LoadRenderPreset(self.render_preset)
+                self.pj.SetRenderSettings(render_settings)
+                jobId = self.pj.AddRenderJob()
+                if len(jobId) >= 0:
+                    successed_job += 1
+                ratio = float(successed_job/total)
+                self.increase_pgbar(ratio)
+            else:
+                pass
+        self.itm[AddRenderJobs].Enabled = True
 
 clipcolor_buttons = []
 for i in list(clipcolor):
@@ -282,6 +306,8 @@ EnableVFXPullMode = 'EnableVFXPullMode'
 DefaultWidth = 'default_width'
 PreviewResolution = 'PreviewResolution'
 DefaultDirection = 'DefaultDirection'
+ProgressBar = 'progressbar'
+ProgressBarBG = 'progressbarbg'
 
 window_01 = [
         ui.HGroup({'Spacing': 10},
@@ -313,7 +339,11 @@ window_01 = [
                     ]),
                     
                     ui.Button({'ID': AddRenderJobs, 'Text': 'Run', 'Weight': 7, 'Enabled': False}),
-                    ui.HGap({'Spacing': 10})
+                    ui.HGap({'Spacing': 10}),
+                    ui.Stack({"ID": "pg_set", "Visible": False,},[
+                        ui.Label({"ID": ProgressBarBG,  "StyleSheet": "max-height: 3px; background-color: rgb(37,37,37)",}),
+                        ui.Label({"ID": ProgressBar, "Visible":False, "StyleSheet": "max-height: 1px; background-color: rgb(102, 221, 39);border-width: 1px;border-style: solid;border-color: rgb(37,37,37);",})
+                    ]),
             ]),
         ]),
     ]
@@ -450,8 +480,10 @@ def _pop_resolution_status_window(ev):
 def _release_run_button(ev):
     if len(itm[OutputPathStr].Text) >= 1:
         itm[AddRenderJobs].Enabled = True
+        itm['pg_set'].Visible = True
     else:
         itm[AddRenderJobs].Enabled = False
+        itm['pg_set'].Visible = False
 
 def _pickfile(ev):
     selected = fu.RequestDir()
@@ -464,8 +496,10 @@ def _run_add(ev):
     preset = itm[RenderPresets].CurrentText
     color = itm[ClipColorPicker].Text
     track = int(itm[TrackNumber].CurrentText)
-    add = Add_retime_render(direction = itm[DefaultDirection].CurrentText ,render_preset = preset, key_color = color, track = track, isVFXPullResoltion=enabled)
+    add = Add_retime_render(ui_item=itm ,direction = itm[DefaultDirection].CurrentText ,render_preset = preset, key_color = color, track = track, isVFXPullResoltion=enabled)
     add.render_single_clip(path, VFXPullReso = int(itm[DefaultWidth].Value))
+
+
 
 def _refresh_presets(ev):
     load_preset()
@@ -512,7 +546,7 @@ dlg.On[EnableVFXPullMode].Clicked = _isVFXResolution
 dlg.On[PreviewResolution].Clicked = _pop_resolution_status_window
 
 
-if __name__ is "__main__":
+if __name__ == "__main__":
     dlg.Show()
     disp.RunLoop()
     dlg.Hide()
