@@ -102,6 +102,9 @@ dlg = disp.AddWindow({
                                     600, 300, # position when starting
                                     400, 400 # width, height
                          ], 
+                        "WindowFlags":{
+                            "Window": True,
+                        }
                         },
     current_window)
  

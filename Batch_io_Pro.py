@@ -409,6 +409,9 @@ def _pop_resolution_status_window(ev):
                                     main_pos[1] + bt_pos[3]+ 400, main_pos[2] + bt_pos[2] + 100, # position when starting
                                     550, win_height # width, height
                          ], 
+                        "WindowFlags":{
+                            "Window": True,
+                        }
                         },
                         popup_status_window)
     
