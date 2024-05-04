@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 # Author: 张来吃
-# Version: 2.0.3
+# Version: 2.0.4
 # Contact: laciechang@163.com
 
 # 感谢 Igor Ridanovic 提供的时间码转换方法
