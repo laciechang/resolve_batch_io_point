@@ -12,6 +12,7 @@
 
 from PIL import ImageDraw, Image
 import tempfile, math
+# import DaVinciResolveScript as bmd
 
 fu = bmd.scriptapp('Fusion')
 ui = fu.UIManager
@@ -241,7 +242,7 @@ class Add_retime_render(object):
         for i in self.all_clips:
             tClip = self.all_clips[i]
             clip_color = tClip.GetClipColor()
-            if clip_color is '':
+            if clip_color == '':
                 pass
             elif clip_color == self.key_color:
                 total += 1
@@ -262,7 +263,7 @@ class Add_retime_render(object):
             tClip = self.all_clips[i]
             w, h = self.calc_output_height(tClip, VFXPullReso)
             clip_color = tClip.GetClipColor()
-            if clip_color is '':
+            if clip_color == '':
                 print('Clip color is empty, passed.')
                 pass
             elif clip_color == self.key_color:
@@ -368,12 +369,11 @@ def _exit(ev):
 dlg.On.MyWin.Close = _exit
 
 # ----------------------------------------------
-
 def load_preset():
     itm[RenderPresets].Clear()
     preset_list = this_pj().GetRenderPresets()
-    for i in preset_list:
-        preset = preset_list[len(preset_list) - i + 1]
+    for i in list(preset_list.keys()):
+        preset = preset_list[i]
         itm[RenderPresets].AddItem(str(preset))
 
 def load_track_count():
