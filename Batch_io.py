@@ -38,7 +38,7 @@ class Add_retime_render():
         pj = this_pj()
         for i in self.all_clips:
             clip_color = self.all_clips[i].GetClipColor()
-            if clip_color is '':
+            if clip_color == '':
                 print('No need to render this clip')
                 pass
             else:
@@ -102,9 +102,10 @@ dlg = disp.AddWindow({
                                     600, 300, # position when starting
                                     400, 400 # width, height
                          ], 
-                        "WindowFlags":{
+                        "WindowFlags": {
                             "Window": True,
-                        }
+                            "WindowStaysOnTopHint": True,
+                        },
                         },
     current_window)
  
