@@ -10,14 +10,14 @@
 # 本工具仅支持在达芬奇内运行
 # -----------------------------------------------------
 
-from PIL import ImageDraw, Image
-import tempfile, math
+import math
+# import DaVinciResolveScript as bmd
 
 fu = bmd.scriptapp('Fusion')
 ui = fu.UIManager
 disp = bmd.UIDispatcher(ui)
 
-clipcolor = {
+CLIPCOLORS = {
     'Orange': [0, 110, 235],
     'Apricot': [51, 168, 255],
     'Yellow': [28, 169 ,226],
@@ -157,15 +157,18 @@ class SMPTE(object):
 				str(fr).zfill(2)
 				)
 
-def icon_gen(bgr):
-    rgb = tuple([bgr[2], bgr[1], bgr[0]])
-    bg = Image.new('RGBA', (100, 100), (0,0,0,0))
-    dot = ImageDraw.Draw(bg)
-    dot.ellipse([1,1,99,99],fill = 'black', outline = None)
-    dot.ellipse([10,10,90,90],fill = rgb, outline = None)
-    tmp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-    bg.save(tmp_file)
-    return tmp_file.name
+def colorbuttonStylesheet(r,g,b):
+    r,g,b = int(int(r)/2)*2, int(int(g)/2)*2, int(int(b)/2)*2
+    return "QPushButton {max-height: 16px;max-width: 72px;color: rgb(0,0,0);background-color: rgb(%s, %s, %s);border: 1px solid black;border-radius: 8px}\nQPushButton:pressed{background-color: rgb(%s, %s, %s)}"%(r,g,b,r/2,g/2,b/2)
+
+def clipcolorGroup():
+    group = []
+    color_dict = CLIPCOLORS
+    for color in list(color_dict.keys()):
+        rgb = color_dict[color]
+        group.append(ui.Button({"ID": color,"Text": color,"Checkable": True,"AutoExclusive": True,"Checked":True, "StyleSheet": colorbuttonStylesheet(rgb[2], rgb[1], rgb[0])}))
+    o = ui.VGroup({"ID": "colorbuttons"},group)
+    return o
 
 def getresolve(app='Resolve'):
     return bmd.scriptapp(app)
@@ -288,12 +291,6 @@ class Add_retime_render(object):
                 pass
         self.itm[AddRenderJobs].Enabled = True
 
-clipcolor_buttons = []
-for i in list(clipcolor):
-    color_bgr = clipcolor[i]
-    temp_icon_path = icon_gen(color_bgr)
-    clipcolor_buttons.append(ui.Button({'ID': i, 'Text': i, 'Flat': True, 'IconSize': [10, 10], 'Icon': ui.Icon({'File': temp_icon_path})}))
-
 OutputPathPick = 'pickpath'
 OutputPathStr = 'r_path'
 ClipColorPicker = 'clipcolors'
@@ -355,6 +352,10 @@ dlg = disp.AddWindow({
                                     800, 500, # position when starting
                                     600, 400 # width, height
                          ], 
+                        "WindowFlags": {
+                            "Window": True,
+                            "WindowStaysOnTopHint": True,
+                        },
                         },
     window_01)
  
@@ -521,14 +522,17 @@ def _clipcolor_popup(ev):
                                     120, 500 # width, height
                          ], 
                         },
-                        [ui.VGroup(clipcolor_buttons)])
+                        [clipcolorGroup()])
     
     def __change_combo(ev):
         who_clicked = ev['who']
         itm[ClipColorPicker].Text = who_clicked
+        rgb = CLIPCOLORS[who_clicked]
+        r,g,b = int(int(rgb[2])/2)*2, int(int(rgb[1])/2)*2, int(int(rgb[0])/2)*2
+        itm[ClipColorPicker].StyleSheet = """QPushButton { color: rgb(%s,%s,%s);}"""%(r,g,b)
         disp.ExitLoop()
 
-    for i in list(clipcolor):
+    for i in list(CLIPCOLORS):
         new_win.On[i].Clicked = __change_combo
 
     new_win.Show()
