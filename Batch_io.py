@@ -119,8 +119,8 @@ dlg.On.MyWin.Close = _func
 def load_preset():
     itm['render_presets'].Clear()
     preset_list = this_pj().GetRenderPresets()
-    for i in preset_list:
-        preset = preset_list[len(preset_list) - i + 1]
+    for i in list(preset_list.keys()):
+        preset = preset_list[i]
         itm['render_presets'].AddItem(str(preset))
 
 def load_track_count():

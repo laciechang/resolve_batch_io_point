@@ -12,7 +12,6 @@
 
 from PIL import ImageDraw, Image
 import tempfile, math
-# import DaVinciResolveScript as bmd
 
 fu = bmd.scriptapp('Fusion')
 ui = fu.UIManager
